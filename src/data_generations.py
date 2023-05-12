@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 
 class SyntheticDataGenerator:
@@ -54,14 +55,30 @@ class SyntheticDataGenerator:
 
         return points
 
-    def make_hypertorus(self) -> np.ndarray:
+    def make_hypertorus(self, r: float = 1., R: float = 2.) -> np.ndarray:  # noqa
         """
         Method to generate a toy dataset of N-dimensional torus.
 
+        Args:
+        - r: radius of the cross-section circle of the torus
+        - R: distance from the center of the torus to the center of the cross-section circle
+
         Returns:
             - points: points distributed on the hypertorus manifold
+
+        Torus parameterization:
+            - https://math.stackexchange.com/questions/358825/parametrisation-of-the-surface-a-torus
         """
-        pass
+        theta = np.random.uniform(0, 2 * np.pi, self.n_points)
+        phi = np.random.uniform(0, 2 * np.pi, self.n_points)
+
+        x = (R + r * np.cos(phi)) * np.cos(theta)
+        y = (R + r * np.cos(phi)) * np.sin(theta)
+        z = r * np.sin(phi)
+
+        points = np.stack((x, y, z), axis=-1)
+
+        return points
 
 
 def visualize2D(data: np.ndarray):
@@ -88,6 +105,8 @@ if __name__ == "__main__":
     generator = SyntheticDataGenerator(n_dims=3, n_points=10_000)
     sphere = generator.make_hypersphere()
     ball = generator.make_hyperball()
+    torus = generator.make_hypertorus()
 
     visualize3D(ball)
     visualize3D(sphere)
+    visualize3D(torus)
