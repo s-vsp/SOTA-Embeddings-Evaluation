@@ -1,5 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from umap import UMAP
+
+from typing import Tuple
 
 class SyntheticDataGenerator:
     """
@@ -77,6 +80,58 @@ class SyntheticDataGenerator:
         points = np.stack((x, y, z), axis=-1)
 
         return points
+    
+    def make_triple_hypersphere_dataset(self) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Method to create a dataset of synthetic hyperspheres.
+
+        Returns:
+            - X: (n_points, n_dims)-dimensional data of hyperspheres
+            - y: (n_points,)-dimensional labels corresponding to inner hyperspheres
+        """
+        hypersphere1 = self.make_hypersphere() * 0.5
+        hypersphere2 = self.make_hypersphere()
+        hypersphere3 = self.make_hypersphere() * 2.0
+
+        labels1 = np.zeros(shape=hypersphere1.shape[0])
+        labels2 = np.ones(shape=hypersphere2.shape[0])
+        labels3 = np.ones(shape=hypersphere3.shape[0]) * 2
+
+        hyperspheres = np.concatenate([hypersphere1, hypersphere2, hypersphere3], axis=0)
+        labels = np.concatenate([labels1, labels2, labels3], axis=0)
+
+        data = np.column_stack((hyperspheres, labels))
+        np.random.shuffle(data)
+
+        X, y = data[:, :-1], data[:, -1]
+
+        return X, y
+
+    def make_triple_hyperball_dataset(self) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Method to create a dataset of synthetic hyperballs.
+
+        Returns:
+            - X: (n_points, n_dims)-dimensional data of hyperballs
+            - y: (n_points,)-dimensional labels corresponding to inner hyperballs
+        """
+        hyperball1 = self.make_hyperball() * 0.5
+        hyperball2 = self.make_hyperball()
+        hyperball3 = self.make_hyperball() * 2.0
+
+        labels1 = np.zeros(shape=hyperball1.shape[0])
+        labels2 = np.ones(shape=hyperball2.shape[0])
+        labels3 = np.ones(shape=hyperball3.shape[0]) * 2
+
+        hyperballs = np.concatenate([hyperball1, hyperball2, hyperball3], axis=0)
+        labels = np.concatenate([labels1, labels2, labels3], axis=0)
+
+        data = np.column_stack((hyperballs, labels))
+        np.random.shuffle(data)
+
+        X, y = data[:, :-1], data[:, -1]
+
+        return X, y
 
 
 def visualize2D(data: np.ndarray):
@@ -100,11 +155,14 @@ def visualize3D(data: np.ndarray):
 
 
 if __name__ == "__main__":
-    generator = SyntheticDataGenerator(n_dims=3, n_points=10_000)
-    sphere = generator.make_hypersphere()
-    ball = generator.make_hyperball()
-    torus = generator.make_hypertorus()
+    generator = SyntheticDataGenerator(n_dims=3, n_points=5000)
 
-    visualize3D(ball)
-    visualize3D(sphere)
-    visualize3D(torus)
+    X, y = generator.make_triple_hypersphere_dataset()   
+
+    umap = UMAP(n_components=2)
+
+    embd = umap.fit_transform(X)
+
+    plt.figure(figsize=(7,7))
+    plt.scatter(X[:,0], X[:,1], c=y, cmap="viridis")
+    plt.show()
