@@ -4,6 +4,7 @@ from umap import UMAP
 
 from typing import Tuple
 
+
 class SyntheticDataGenerator:
     """
     Class object to generate synthetic toy datasets of n-dimensional manifolds.
@@ -66,21 +67,27 @@ class SyntheticDataGenerator:
 
         Returns:
             - points: points distributed on the hypertorus manifold
-
-        Torus parameterization:
-            - https://math.stackexchange.com/questions/358825/parametrisation-of-the-surface-a-torus
         """
-        theta = np.random.uniform(0, 2 * np.pi, self.n_points)
-        phi = np.random.uniform(0, 2 * np.pi, self.n_points)
+        points = self.make_hypersphere(radius=r)
+        points[:, :-1] += R
 
-        x = (R + r * np.cos(phi)) * np.cos(theta)
-        y = (R + r * np.cos(phi)) * np.sin(theta)
-        z = r * np.sin(phi)
+        if self.n_dims > 1:
+            rotation_matrix = np.identity(self.n_dims)
+            thetas = np.random.uniform(0, 2 * np.pi, self.n_points)
 
-        points = np.stack((x, y, z), axis=-1)
+            for idx, theta in enumerate(thetas):
+                cos_theta = np.cos(theta)
+                sin_theta = np.sin(theta)
+
+                rotation_matrix[0, 0] = cos_theta
+                rotation_matrix[0, 1] = -1 * sin_theta
+                rotation_matrix[1, 0] = sin_theta
+                rotation_matrix[1, 1] = cos_theta
+
+                points[idx, :] = points[idx, :] @ rotation_matrix
 
         return points
-    
+
     def make_triple_hypersphere_dataset(self) -> Tuple[np.ndarray, np.ndarray]:
         """
         Method to create a dataset of synthetic hyperspheres.
@@ -143,7 +150,7 @@ def visualize2D(data: np.ndarray):
     plt.show()
 
 
-def visualize3D(data: np.ndarray):
+def visualize3D(data: np.ndarray, lim3d: float = 0):
     # TODO
     fig = plt.figure(figsize=(7, 7))
     ax = fig.add_subplot(111, projection="3d")
@@ -151,18 +158,23 @@ def visualize3D(data: np.ndarray):
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_zlabel("Z")
+    if lim3d != 0:
+        lim3d *= 2
+        ax.set_xlim3d(-lim3d, lim3d)
+        ax.set_ylim3d(-lim3d, lim3d)
+        ax.set_zlim3d(-lim3d, lim3d)
     plt.show()
 
 
 if __name__ == "__main__":
-    generator = SyntheticDataGenerator(n_dims=3, n_points=5000)
+    generator = SyntheticDataGenerator(n_dims=3, n_points=1_000)
 
-    X, y = generator.make_triple_hypersphere_dataset()   
+    X, y = generator.make_triple_hypersphere_dataset()
 
     umap = UMAP(n_components=2)
 
     embd = umap.fit_transform(X)
 
-    plt.figure(figsize=(7,7))
-    plt.scatter(X[:,0], X[:,1], c=y, cmap="viridis")
+    plt.figure(figsize=(7, 7))
+    plt.scatter(X[:, 0], X[:, 1], c=y, cmap="viridis")
     plt.show()
