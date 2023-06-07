@@ -88,7 +88,7 @@ class SyntheticDataGenerator:
 
         return points
 
-    def make_triple_hypersphere_dataset(self) -> Tuple[np.ndarray, np.ndarray]:
+    def make_triple_hypersphere_dataset(self, save: bool) -> Tuple[np.ndarray, np.ndarray]:
         """
         Method to create a dataset of synthetic hyperspheres.
 
@@ -111,10 +111,12 @@ class SyntheticDataGenerator:
         np.random.shuffle(data)
 
         X, y = data[:, :-1], data[:, -1]
+        if save:
+            np.save(f"triple_hyperspheres-n_points-{X.shape[0]}-n_dims-{X.shape[1]}", data)
 
         return X, y
 
-    def make_triple_hyperball_dataset(self) -> Tuple[np.ndarray, np.ndarray]:
+    def make_triple_hyperball_dataset(self, save: bool) -> Tuple[np.ndarray, np.ndarray]:
         """
         Method to create a dataset of synthetic hyperballs.
 
@@ -137,6 +139,8 @@ class SyntheticDataGenerator:
         np.random.shuffle(data)
 
         X, y = data[:, :-1], data[:, -1]
+        if save:
+            np.save(f"triple_hyperballs-n_points-{X.shape[0]}-n_dims-{X.shape[1]}", data)
 
         return X, y
 
