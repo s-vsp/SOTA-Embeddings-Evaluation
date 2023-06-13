@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 
@@ -48,10 +49,18 @@ class Experiment:
         pass
 
     def run_evaluation(self):
+        print("Running t-SNE...")
         tsne_embedded = self.run_tSNE()
+        np.save("./data/triple_hyperspheres/tsne/tSNE-" + str(self.name), tsne_embedded)
+        print("Running UMAP...")
         umap_embedded = self.run_UMAP()
+        np.save("./data/triple_hyperspheres/umap/UMAP-" + str(self.name), umap_embedded)
+        print("Running PaCMAP...")
         pacmap_embedded = self.run_PaCMAP()
+        np.save("./data/triple_hyperspheres/pacmap/PaCMAP-" + str(self.name), pacmap_embedded)
+        print("Running TriMAP...")
         trimap_embedded = self.run_TriMAP()
+        np.save("./data/triple_hyperspheres/trimap/TriMAP-" + str(self.name), trimap_embedded)
 
         # SILHOUETTE
         original_silhouette = silhouette_score(self.X, self.y)
@@ -76,10 +85,10 @@ class Experiment:
                 "trustworthiness": [original_trustworthiness, tsne_trustworthiness, umap_trustworthiness, pacmap_trustworthiness, trimap_trustworthiness]
             }
         )
-        evaluation_df.to_csv(f"{self.name}-n_points-{self.X.shape[0]}-n_dims-{self.X.shape[1]}.csv")
+        evaluation_df.to_csv(f"{self.name}.csv")
 
         # KNN GAIN and DR QUALITY
-        lm = LocalMetric()
+        lm = LocalMetric(save_path=self.name)
 
         lm.calculate_knn_gain_and_dr_quality(
             X_lds=tsne_embedded[:,:-1], 
@@ -112,7 +121,16 @@ class Experiment:
         lm.visualize()
 
 if __name__ == "__main__":
-    data = np.load("./triple_hyperspheres-n_points-3000-n_dims-4.npy")
-    
-    experiment = Experiment(dataset=data, name="Test")
-    experiment.run_evaluation()
+    #data = np.load("./data/triple_hyperspheres/triple_hyperspheres-n_points-3000-n_dims-4.npy")
+
+    #experiment = Experiment(dataset=data, name="Test")
+    #experiment.run_evaluation()
+    for root, dirs, files in os.walk("./data/triple_hyperspheres/original/"):
+        for file in files:
+            name = str(file)[:-4]
+            
+            print(f"RUNNING FOR {name}...")
+            data = np.load(os.path.join(root, file))
+
+            experiment = Experiment(dataset=data, name=name)
+            experiment.run_evaluation()
