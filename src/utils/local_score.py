@@ -129,6 +129,7 @@ def viz_qa(
     grid_col="lightgrey",
     grid_alpha=0.7,
     xlog=True,
+    save_path=str
 ):
     # Number of curves
     nc = len(Ly)
@@ -254,7 +255,7 @@ def viz_qa(
 
     # Showing the figure
     fig.savefig(
-        "./visualizations/{}.png".format(
+        "./visualizations/" + str(save_path) + " - {}.png".format(
             tit
         ),
         dpi=fig.dpi,
@@ -262,13 +263,14 @@ def viz_qa(
 
 
 class LocalMetric:
-    def __init__(self):
+    def __init__(self, save_path):
         self.L_rnx = []
         self.L_kg = []
         self.Lleg_rnx = []
         self.Lleg_kg = []
         self.Lls = []
         self.number_of_methods = 0
+        self.save_path = save_path
 
     def calculate_knn_gain_and_dr_quality(
         self,
@@ -323,6 +325,7 @@ class LocalMetric:
             tit="DR quality",
             xlabel="Neighborhood size $K$",
             ylabel="$R_{NX}(K)$",
+            save_path=self.save_path
         )
 
         viz_qa(
@@ -336,6 +339,7 @@ class LocalMetric:
             tit="KNN gain",
             xlabel="Neighborhood size $K$",
             ylabel="$G_{NN}(K)$",
+            save_path=self.save_path
         )
 
         print("Finished.")

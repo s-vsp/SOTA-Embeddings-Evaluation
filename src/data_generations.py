@@ -112,7 +112,7 @@ class SyntheticDataGenerator:
 
         X, y = data[:, :-1], data[:, -1]
         if save:
-            np.save(f"triple_hyperspheres-n_points-{X.shape[0]}-n_dims-{X.shape[1]}", data)
+            np.save(f"./data/triple_hyperspheres-n_points-{X.shape[0]}-n_dims-{X.shape[1]}", data)
 
         return X, y
 
@@ -140,7 +140,7 @@ class SyntheticDataGenerator:
 
         X, y = data[:, :-1], data[:, -1]
         if save:
-            np.save(f"triple_hyperballs-n_points-{X.shape[0]}-n_dims-{X.shape[1]}", data)
+            np.save(f"./data/triple_hyperballs-n_points-{X.shape[0]}-n_dims-{X.shape[1]}", data)
 
         return X, y
 
@@ -171,14 +171,10 @@ def visualize3D(data: np.ndarray, lim3d: float = 0):
 
 
 if __name__ == "__main__":
-    generator = SyntheticDataGenerator(n_dims=3, n_points=1_000)
+    N_DIMS = list(range(3,21))
+    N_POINTS = [100, 500, 1000, 2500, 5000, 10_000, 20_000, 30_000]
 
-    X, y = generator.make_triple_hypersphere_dataset()
-
-    umap = UMAP(n_components=2)
-
-    embd = umap.fit_transform(X)
-
-    plt.figure(figsize=(7, 7))
-    plt.scatter(X[:, 0], X[:, 1], c=y, cmap="viridis")
-    plt.show()
+    for n_dims in N_DIMS:
+        for n_points in N_POINTS:
+            data_generator = SyntheticDataGenerator(n_dims=n_dims, n_points=n_points)
+            X, y = data_generator.make_triple_hypersphere_dataset(True)
